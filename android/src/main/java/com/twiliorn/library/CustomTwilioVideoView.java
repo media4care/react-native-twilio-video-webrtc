@@ -36,6 +36,7 @@ import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.twilio.audioswitch.AudioSwitch;
 import com.twilio.video.AudioTrackPublication;
 import com.twilio.video.BaseTrackStats;
 import com.twilio.video.CameraCapturer;
@@ -88,6 +89,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
+import kotlin.Unit;
 
 import static com.twiliorn.library.CustomTwilioVideoView.Events.ON_AUDIO_CHANGED;
 import static com.twiliorn.library.CustomTwilioVideoView.Events.ON_CAMERA_SWITCHED;
@@ -215,6 +217,7 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
     private Handler dataTrackMessageThreadHandler;
 
     private LocalDataTrack localDataTrack;
+    private AudioSwitch audioSwitch;
 
     // Map used to map remote data tracks to remote participants
     private final Map<RemoteDataTrack, RemoteParticipant> dataTrackRemoteParticipantMap =
@@ -242,6 +245,14 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         // Start the thread where data messages are received
         dataTrackMessageThread.start();
         dataTrackMessageThreadHandler = new Handler(dataTrackMessageThread.getLooper());
+
+        Log.e("RNTwilioVideo", "init AudioSwitch");
+        audioSwitch = new AudioSwitch(getContext());
+        Log.e("RNTwilioVideo", "start audioSwitch");
+        audioSwitch.start((audioDevices, audioDevice) -> {
+            Log.e("RNTwilioVideo", "audioSwitch changed " + audioDevices.toString() + " " + audioDevice.toString());
+            return Unit.INSTANCE;
+        });
 
     }
 
@@ -931,6 +942,9 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
                 for (RemoteParticipant participant : participants) {
                     addParticipant(room, participant);
                 }
+
+                Log.e("RNTwilioVideo", "activate audioSwitch");
+                audioSwitch.activate();
             }
 
             @Override
@@ -940,6 +954,8 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
                 event.putString("roomSid", room.getSid());
                 event.putString("error", e.getMessage());
                 pushEvent(CustomTwilioVideoView.this, ON_CONNECT_FAILURE, event);
+                Log.e("RNTwilioVideo", "deactivate audioSwitch onConnectFailure");
+                audioSwitch.deactivate();
             }
 
             @Override
@@ -982,6 +998,8 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
                 if (!disconnectedFromOnDestroy) {
                     setAudioFocus(false);
                 }
+                Log.e("RNTwilioVideo", "deactivate audioSwitch onDisconnected");
+                audioSwitch.deactivate();
             }
 
             @Override
