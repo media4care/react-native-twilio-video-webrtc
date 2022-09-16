@@ -85,7 +85,8 @@ public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilio
                 boolean dominantSpeakerEnabled = args.getBoolean(6);
                 boolean maintainVideoTrackInBackground = args.getBoolean(7);
                 String cameraType = args.getString(8);
-                ReadableMap encodingParameters = args.getMap(9);
+                String videoQuality = args.getString(9);
+                ReadableMap encodingParameters = args.getMap(10);
                 boolean enableH264Codec = encodingParameters.hasKey("enableH264Codec") ? encodingParameters.getBoolean("enableH264Codec") : false;
                 view.connectToRoomWrapper(
                     roomName,
@@ -97,6 +98,7 @@ public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilio
                     dominantSpeakerEnabled,
                     maintainVideoTrackInBackground,
                     cameraType,
+                    videoQuality,
                     enableH264Codec
                   );
                 break;
