@@ -9,6 +9,7 @@ declare module "react-native-twilio-video-webrtc" {
 
   type scaleType = "fit" | "fill";
   type cameraType = "front" | "back";
+  type videoQuality = "low" | "high";
 
   interface TwilioVideoParticipantViewProps extends ViewProps {
     trackIdentifier: TrackIdentifier;
@@ -124,6 +125,7 @@ declare module "react-native-twilio-video-webrtc" {
     roomName?: string;
     accessToken: string;
     cameraType?: cameraType;
+    videoQuality?: videoQuality;
     dominantSpeakerEnabled?: boolean;
     enableAudio?: boolean;
     enableVideo?: boolean;
@@ -140,6 +142,7 @@ declare module "react-native-twilio-video-webrtc" {
     roomName?: string;
     accessToken: string;
     cameraType?: cameraType;
+    videoQuality?: videoQuality;
     dominantSpeakerEnabled?: boolean;
     enableAudio?: boolean;
     enableVideo?: boolean;
