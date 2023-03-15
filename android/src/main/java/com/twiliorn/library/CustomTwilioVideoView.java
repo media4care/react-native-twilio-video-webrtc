@@ -118,6 +118,8 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
     private static final String DATA_TRACK_MESSAGE_THREAD_NAME = "DataTrackMessages";
     private static final String FRONT_CAMERA_TYPE = "front";
     private static final String BACK_CAMERA_TYPE = "back";
+    private static final String LOW = "low";
+    private static final String HIGH = "high";
     private boolean enableRemoteAudio = false;
     private boolean enableNetworkQualityReporting = false;
     private boolean isVideoEnabled = false;
@@ -127,6 +129,10 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
     private boolean maintainVideoTrackInBackground = false;
     private String cameraType = "";
     private boolean enableH264Codec = false;
+    private VideoDimensions videoDimensions = VideoDimensions.CIF_VIDEO_DIMENSIONS;
+    private Integer frameRate = 15;
+    private EncodingParameters encodingParameters;
+    private String videoQuality = CustomTwilioVideoView.HIGH;
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({Events.ON_CAMERA_SWITCHED,
@@ -449,7 +455,10 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
             boolean dominantSpeakerEnabled,
             boolean maintainVideoTrackInBackground,
             String cameraType,
-            boolean enableH264Codec
+            boolean enableH264Codec,
+            VideoDimensions videoSize,
+            Integer frameRate,
+            String videoQuality
     ) {
         this.roomName = roomName;
         this.accessToken = accessToken;
@@ -459,6 +468,15 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         this.maintainVideoTrackInBackground = maintainVideoTrackInBackground;
         this.cameraType = cameraType;
         this.enableH264Codec = enableH264Codec;
+
+        if (videoSize != null)
+            this.videoDimensions = videoSize;
+
+        if (frameRate != null)
+            this.frameRate = frameRate;
+
+        if (videoQuality != null)
+            this.videoQuality = videoQuality;
 
         // Share your microphone
         localAudioTrack = LocalAudioTrack.create(getContext(), enableAudio);

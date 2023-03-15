@@ -43,6 +43,8 @@ import static com.twiliorn.library.CustomTwilioVideoView.Events.ON_NETWORK_QUALI
 import static com.twiliorn.library.CustomTwilioVideoView.Events.ON_DOMINANT_SPEAKER_CHANGED;
 import static com.twiliorn.library.CustomTwilioVideoView.Events.ON_LOCAL_PARTICIPANT_SUPPORTED_CODECS;
 
+import com.twilio.video.VideoDimensions;
+
 public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilioVideoView> {
     public static final String REACT_CLASS = "RNCustomTwilioVideoView";
 
@@ -86,6 +88,11 @@ public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilio
                 String cameraType = args.getString(8);
                 ReadableMap encodingParameters = args.getMap(9);
                 boolean enableH264Codec = encodingParameters.hasKey("enableH264Codec") ? encodingParameters.getBoolean("enableH264Codec") : false;
+                ReadableMap videoParams = args.getMap(10);
+                VideoDimensions videoSize = videoParams.hasKey("height") && videoParams.hasKey("width") ? new VideoDimensions(videoParams.getInt("width"), videoParams.getInt("height")) : null;
+                Integer frameRate = args.getInt(11);
+                String videoQuality = args.getString(12);
+
                 view.connectToRoomWrapper(
                     roomName,
                     accessToken,
@@ -96,7 +103,10 @@ public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilio
                     dominantSpeakerEnabled,
                     maintainVideoTrackInBackground,
                     cameraType,
-                    enableH264Codec
+                    enableH264Codec,
+                    videoSize,
+                    frameRate,
+                    videoQuality
                   );
                 break;
             case DISCONNECT:
