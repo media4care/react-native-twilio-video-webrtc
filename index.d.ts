@@ -146,7 +146,6 @@ declare module "react-native-twilio-video-webrtc" {
     enableNetworkQualityReporting?: boolean;
     videoParams?: {width: number, height: number};
     frameRate?: number;
-    videoQuality?: "high" | "low";
   };
 
   type androidConnectParams = {
