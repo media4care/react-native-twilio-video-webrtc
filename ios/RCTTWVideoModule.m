@@ -471,10 +471,10 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
       builder.preferredVideoCodecs = @[ [TVIH264Codec new] ];
     }
 
-    if(encodingParameters[@"audioBitrate"] || encodingParameters[@"videoBitrate"]){
-      NSInteger audioBitrate = [encodingParameters[@"audioBitrate"] integerValue];
-      NSInteger videoBitrate = [encodingParameters[@"videoBitrate"] integerValue];
-      builder.encodingParameters = [[TVIEncodingParameters alloc] initWithAudioBitrate:(audioBitrate) ? audioBitrate : 40 videoBitrate:(videoBitrate) ? videoBitrate : 1500];
+    // limit upstream bitrate depending on VideoQuality param
+    // 16 kbps for audio, 512 kbps for low quality video, 0 for max
+    if (videoQuality) {
+      builder.encodingParameters = [[TVIEncodingParameters alloc] initWithAudioBitrate: 16 videoBitrate:([videoQuality isEqualToString:@"low"]) ? 512 : 0];
     }
 
     if (enableNetworkQualityReporting) {

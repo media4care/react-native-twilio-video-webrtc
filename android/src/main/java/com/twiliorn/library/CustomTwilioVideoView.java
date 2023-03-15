@@ -83,6 +83,7 @@ import tvi.webrtc.HardwareVideoDecoderFactory;
 import tvi.webrtc.VideoCodecInfo;
 import com.twilio.video.H264Codec;
 import com.twilio.video.Vp8Codec;
+import com.twilio.video.EncodingParameters;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -563,6 +564,10 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         connectOptionsBuilder.preferVideoCodecs(Collections.singletonList(videoCodec));
 
         connectOptionsBuilder.enableDominantSpeaker(this.dominantSpeakerEnabled);
+
+        // limit upstream bitrate depending on VideoQuality param
+        // 16 kbps for audio, 512 kbps for low quality video, 0 for max
+        connectOptionsBuilder.encodingParameters(new EncodingParameters(16, this.videoQuality.equals(CustomTwilioVideoView.LOW) ? 512 : 0));
 
         if (enableNetworkQualityReporting) {
             connectOptionsBuilder.enableNetworkQuality(true);
