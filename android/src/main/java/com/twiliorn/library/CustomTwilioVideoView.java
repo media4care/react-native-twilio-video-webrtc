@@ -119,8 +119,6 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
     private static final String DATA_TRACK_MESSAGE_THREAD_NAME = "DataTrackMessages";
     private static final String FRONT_CAMERA_TYPE = "front";
     private static final String BACK_CAMERA_TYPE = "back";
-    private static final String LOW = "low";
-    private static final String HIGH = "high";
     private boolean enableRemoteAudio = false;
     private boolean enableNetworkQualityReporting = false;
     private boolean isVideoEnabled = false;
@@ -133,7 +131,8 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
     private VideoDimensions videoDimensions = VideoDimensions.CIF_VIDEO_DIMENSIONS;
     private Integer frameRate = 15;
     private EncodingParameters encodingParameters;
-    private String videoQuality = CustomTwilioVideoView.HIGH;
+    private Integer videoBitrate = 0;
+    private Integer audioBitrate = 16;
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({Events.ON_CAMERA_SWITCHED,
@@ -459,7 +458,8 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
             boolean enableH264Codec,
             VideoDimensions videoSize,
             Integer frameRate,
-            String videoQuality
+            Integer videoBitrate,
+            Integer audioBitrate
     ) {
         this.roomName = roomName;
         this.accessToken = accessToken;
@@ -476,8 +476,11 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         if (frameRate != null)
             this.frameRate = frameRate;
 
-        if (videoQuality != null)
-            this.videoQuality = videoQuality;
+        if (videoBitrate != null)
+            this.videoBitrate = videoBitrate;
+
+        if (audioBitrate != null)
+            this.audioBitrate = audioBitrate;
 
         // Share your microphone
         localAudioTrack = LocalAudioTrack.create(getContext(), enableAudio);
@@ -567,7 +570,7 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
 
         // limit upstream bitrate depending on VideoQuality param
         // 16 kbps for audio, 512 kbps for low quality video, 0 for max
-        connectOptionsBuilder.encodingParameters(new EncodingParameters(16, this.videoQuality.equals(CustomTwilioVideoView.LOW) ? 512 : 0));
+        connectOptionsBuilder.encodingParameters(new EncodingParameters(this.audioBitrate, this.videoBitrate));
 
         if (enableNetworkQualityReporting) {
             connectOptionsBuilder.enableNetworkQuality(true);

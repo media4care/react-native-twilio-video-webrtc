@@ -91,7 +91,8 @@ public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilio
                 ReadableMap videoParams = args.getMap(10);
                 VideoDimensions videoSize = videoParams.hasKey("height") && videoParams.hasKey("width") ? new VideoDimensions(videoParams.getInt("width"), videoParams.getInt("height")) : null;
                 Integer frameRate = args.getInt(11);
-                String videoQuality = args.getString(12);
+                Integer videoBitrate = encodingParameters.hasKey("videoBitrate") ? encodingParameters.getInt("videoBitrate") : 0;
+                Integer audioBitrate = encodingParameters.hasKey("audioBitrate") ? encodingParameters.getInt("audioBitrate") : 16;
 
                 view.connectToRoomWrapper(
                     roomName,
@@ -106,7 +107,8 @@ public class CustomTwilioVideoViewManager extends SimpleViewManager<CustomTwilio
                     enableH264Codec,
                     videoSize,
                     frameRate,
-                    videoQuality
+                    videoBitrate,
+                    audioBitrate
                   );
                 break;
             case DISCONNECT:
