@@ -144,6 +144,9 @@ declare module "react-native-twilio-video-webrtc" {
       videoBitrate?: number;
     };
     enableNetworkQualityReporting?: boolean;
+    videoParams?: {width: number, height: number};
+    frameRate?: number;
+    videoQuality?: "high" | "low";
   };
 
   type androidConnectParams = {
@@ -159,6 +162,9 @@ declare module "react-native-twilio-video-webrtc" {
     };
     enableNetworkQualityReporting?: boolean;
     maintainVideoTrackInBackground?: boolean;
+    videoParams?: {width: number, height: number};
+    frameRate?: number;
+    videoQuality?: "high" | "low";
   };
 
   class TwilioVideo extends React.Component<TwilioVideoProps> {

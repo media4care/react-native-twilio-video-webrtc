@@ -248,7 +248,10 @@ export default class TwilioVideo extends Component {
     enableVideo = true,
     encodingParameters = null,
     enableNetworkQualityReporting = false,
-    dominantSpeakerEnabled = false
+    dominantSpeakerEnabled = false,
+    videoParams = {},
+    frameRate = null,
+    videoQuality = 'high'
   }) {
     TWVideoModule.connect(
       accessToken,
@@ -258,7 +261,10 @@ export default class TwilioVideo extends Component {
       encodingParameters,
       enableNetworkQualityReporting,
       dominantSpeakerEnabled,
-      cameraType
+      cameraType,
+      videoParams,
+      frameRate,
+      videoQuality,
     )
   }
 
