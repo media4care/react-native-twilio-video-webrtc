@@ -74,6 +74,8 @@ import com.twilio.video.Video;
 import com.twilio.video.VideoDimensions;
 import com.twilio.video.VideoFormat;
 import com.twilio.video.VideoCodec;
+import com.twilio.video.BandwidthProfileOptions;
+import com.twilio.video.VideoBandwidthProfileOptions;
 
 import tvi.webrtc.voiceengine.WebRtcAudioManager;
 
@@ -568,6 +570,12 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         // limit upstream bitrate depending on VideoQuality param
         // 16 kbps for audio, 512 kbps for low quality video, 0 for max
         connectOptionsBuilder.encodingParameters(new EncodingParameters(16, this.videoQuality.equals(CustomTwilioVideoView.LOW) ? 512 : 0));
+
+        // limit downstream bitrate depending on VideoQuality param
+        if (this.videoQuality.equals(CustomTwilioVideoView.LOW)) {
+            long subscriptionBitrate = 528L; // 512 + 16
+            connectOptionsBuilder.bandwidthProfile(new BandwidthProfileOptions(new VideoBandwidthProfileOptions.Builder().maxSubscriptionBitrate(subscriptionBitrate).build()));
+        }
 
         if (enableNetworkQualityReporting) {
             connectOptionsBuilder.enableNetworkQuality(true);

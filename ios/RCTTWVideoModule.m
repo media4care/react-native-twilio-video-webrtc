@@ -477,6 +477,16 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
       builder.encodingParameters = [[TVIEncodingParameters alloc] initWithAudioBitrate: 16 videoBitrate:([videoQuality isEqualToString:@"low"]) ? 512 : 0];
     }
 
+    // limit downstream bitrate depending on VideoQuality param
+    if([videoQuality isEqualToString:@"low"]){
+      TVIVideoBandwidthProfileOptions *videoBandwidthProfileOptions = [TVIVideoBandwidthProfileOptions optionsWithBlock:^(TVIVideoBandwidthProfileOptionsBuilder *builder) {
+          // Configure the bandwidth profile options here
+          builder.maxSubscriptionBitrate = @(528); // 512 + 16
+      }];
+      TVIBandwidthProfileOptions *bandwidthProfileOptions = [[TVIBandwidthProfileOptions alloc] initWithVideoOptions:videoBandwidthProfileOptions];
+      builder.bandwidthProfileOptions = bandwidthProfileOptions;
+    }
+
     if (enableNetworkQualityReporting) {
       builder.networkQualityEnabled = true;
       builder.networkQualityConfiguration = [ [TVINetworkQualityConfiguration alloc] initWithLocalVerbosity:TVINetworkQualityVerbosityMinimal remoteVerbosity:TVINetworkQualityVerbosityMinimal];
