@@ -467,9 +467,8 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
       kRCTTWVideoAppCameraSourceDimensions.height = height;
     }
 
-    if(encodingParameters[@"enableH264Codec"]){
-      builder.preferredVideoCodecs = @[ [TVIH264Codec new] ];
-    }
+    builder.networkQualityEnabled = true;
+    builder.networkQualityConfiguration = [ [TVINetworkQualityConfiguration alloc] initWithLocalVerbosity:TVINetworkQualityVerbosityMinimal remoteVerbosity:TVINetworkQualityVerbosityMinimal];
 
     // limit upstream bitrate depending on VideoQuality param
     // 16 kbps for audio, 512 kbps for low quality video, 0 for max
@@ -485,11 +484,6 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
       }];
       TVIBandwidthProfileOptions *bandwidthProfileOptions = [[TVIBandwidthProfileOptions alloc] initWithVideoOptions:videoBandwidthProfileOptions];
       builder.bandwidthProfileOptions = bandwidthProfileOptions;
-    }
-
-    if (enableNetworkQualityReporting) {
-      builder.networkQualityEnabled = true;
-      builder.networkQualityConfiguration = [ [TVINetworkQualityConfiguration alloc] initWithLocalVerbosity:TVINetworkQualityVerbosityMinimal remoteVerbosity:TVINetworkQualityVerbosityMinimal];
     }
 
   }];

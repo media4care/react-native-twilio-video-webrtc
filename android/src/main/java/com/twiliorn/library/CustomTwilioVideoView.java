@@ -523,49 +523,22 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
             connectOptionsBuilder.dataTracks(Collections.singletonList(localDataTrack));
         }
 
-        // H264 Codec Support Detection: https://www.twilio.com/docs/video/managing-codecs
-        HardwareVideoEncoderFactory hardwareVideoEncoderFactory = new HardwareVideoEncoderFactory(null, true, true);
-        HardwareVideoDecoderFactory hardwareVideoDecoderFactory = new HardwareVideoDecoderFactory(null);
+        /*
+         * Toggles automatic track subscription. If set to false, the LocalParticipant will receive
+         * notifications of track publish events, but will not automatically subscribe to them. If
+         * set to true, the LocalParticipant will automatically subscribe to tracks as they are
+         * published. If unset, the default is true. Note: This feature is only available for Group
+         * Rooms. Toggling the flag in a P2P room does not modify subscription behavior.
+         */
+        connectOptionsBuilder.enableAutomaticSubscription(true);
 
-        boolean h264EncoderSupported = false;
-        for (VideoCodecInfo videoCodecInfo : hardwareVideoEncoderFactory.getSupportedCodecs()) {
-            if (videoCodecInfo.name.equalsIgnoreCase("h264")) {
-                h264EncoderSupported = true;
-                break;
-            }
-        }
-        boolean h264DecoderSupported = false;
-        for (VideoCodecInfo videoCodecInfo : hardwareVideoDecoderFactory.getSupportedCodecs()) {
-            if (videoCodecInfo.name.equalsIgnoreCase("h264")) {
-                h264DecoderSupported = true;
-                break;
-            }
-        }
-
-        boolean isH264Supported = h264EncoderSupported && h264DecoderSupported;
-
-        Log.d("RNTwilioVideo", "H264 supported by hardware: " + isH264Supported);
-
-        WritableArray supportedCodecs = new WritableNativeArray();
-
-        VideoCodec videoCodec =  new Vp8Codec();
-        // VP8 is supported on all android devices by default
-        supportedCodecs.pushString(videoCodec.toString());
-
-        if (isH264Supported && this.enableH264Codec) {
-            videoCodec = new H264Codec();
-            supportedCodecs.pushString(videoCodec.toString());
-        }
-
-        WritableMap event = new WritableNativeMap();
-
-        event.putArray("supportedCodecs", supportedCodecs);
-
-        pushEvent(CustomTwilioVideoView.this, ON_LOCAL_PARTICIPANT_SUPPORTED_CODECS, event);
-
-        connectOptionsBuilder.preferVideoCodecs(Collections.singletonList(videoCodec));
+        connectOptionsBuilder.enableNetworkQuality(true);
 
         connectOptionsBuilder.enableDominantSpeaker(this.dominantSpeakerEnabled);
+
+        connectOptionsBuilder.networkQualityConfiguration(new NetworkQualityConfiguration(
+                NetworkQualityVerbosity.NETWORK_QUALITY_VERBOSITY_MINIMAL,
+                NetworkQualityVerbosity.NETWORK_QUALITY_VERBOSITY_MINIMAL));
 
         // limit upstream bitrate depending on VideoQuality param
         // 16 kbps for audio, 512 kbps for low quality video, 0 for max
@@ -575,13 +548,6 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         if (this.videoQuality.equals(CustomTwilioVideoView.LOW)) {
             long subscriptionBitrate = 528L; // 512 + 16
             connectOptionsBuilder.bandwidthProfile(new BandwidthProfileOptions(new VideoBandwidthProfileOptions.Builder().maxSubscriptionBitrate(subscriptionBitrate).build()));
-        }
-
-        if (enableNetworkQualityReporting) {
-            connectOptionsBuilder.enableNetworkQuality(true);
-            connectOptionsBuilder.networkQualityConfiguration(new NetworkQualityConfiguration(
-                    NetworkQualityVerbosity.NETWORK_QUALITY_VERBOSITY_MINIMAL,
-                    NetworkQualityVerbosity.NETWORK_QUALITY_VERBOSITY_MINIMAL));
         }
 
         room = Video.connect(getContext(), connectOptionsBuilder.build(), roomListener());
