@@ -83,6 +83,7 @@ import tvi.webrtc.HardwareVideoDecoderFactory;
 import tvi.webrtc.VideoCodecInfo;
 import com.twilio.video.H264Codec;
 import com.twilio.video.Vp8Codec;
+import com.twilio.video.EncodingParameters;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -127,6 +128,11 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
     private boolean maintainVideoTrackInBackground = false;
     private String cameraType = "";
     private boolean enableH264Codec = false;
+    private VideoDimensions videoDimensions = VideoDimensions.CIF_VIDEO_DIMENSIONS;
+    private Integer frameRate = 15;
+    private EncodingParameters encodingParameters;
+    private Integer videoBitrate = 0;
+    private Integer audioBitrate = 16;
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({Events.ON_CAMERA_SWITCHED,
@@ -248,7 +254,7 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
     // ===== SETUP =================================================================================
 
     private VideoFormat buildVideoFormat() {
-        return new VideoFormat(VideoDimensions.CIF_VIDEO_DIMENSIONS, 15);
+        return new VideoFormat(this.videoDimensions, this.frameRate);
     }
 
     private CameraCapturer createCameraCaputer(Context context, String cameraId) {
@@ -449,7 +455,11 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
             boolean dominantSpeakerEnabled,
             boolean maintainVideoTrackInBackground,
             String cameraType,
-            boolean enableH264Codec
+            boolean enableH264Codec,
+            VideoDimensions videoSize,
+            Integer frameRate,
+            Integer videoBitrate,
+            Integer audioBitrate
     ) {
         this.roomName = roomName;
         this.accessToken = accessToken;
@@ -459,6 +469,18 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         this.maintainVideoTrackInBackground = maintainVideoTrackInBackground;
         this.cameraType = cameraType;
         this.enableH264Codec = enableH264Codec;
+
+        if (videoSize != null)
+            this.videoDimensions = videoSize;
+
+        if (frameRate != null)
+            this.frameRate = frameRate;
+
+        if (videoBitrate != null)
+            this.videoBitrate = videoBitrate;
+
+        if (audioBitrate != null)
+            this.audioBitrate = audioBitrate;
 
         // Share your microphone
         localAudioTrack = LocalAudioTrack.create(getContext(), enableAudio);
@@ -545,6 +567,10 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
         connectOptionsBuilder.preferVideoCodecs(Collections.singletonList(videoCodec));
 
         connectOptionsBuilder.enableDominantSpeaker(this.dominantSpeakerEnabled);
+
+        // limit upstream bitrate depending on VideoQuality param
+        // 16 kbps for audio, 512 kbps for low quality video, 0 for max
+        connectOptionsBuilder.encodingParameters(new EncodingParameters(this.audioBitrate, this.videoBitrate));
 
         if (enableNetworkQualityReporting) {
             connectOptionsBuilder.enableNetworkQuality(true);

@@ -36,12 +36,14 @@ static NSString* cameraDidStopRunning         = @"cameraDidStopRunning";
 static NSString* statsReceived                = @"statsReceived";
 static NSString* networkQualityLevelsChanged  = @"networkQualityLevelsChanged";
 
-static const CMVideoDimensions kRCTTWVideoAppCameraSourceDimensions = (CMVideoDimensions){900, 720};
+static CMVideoDimensions kRCTTWVideoAppCameraSourceDimensions = (CMVideoDimensions){900, 720};
 
-static const int32_t kRCTTWVideoCameraSourceFrameRate = 15;
+static int32_t kRCTTWVideoCameraSourceFrameRate = 15;
 
 TVIVideoFormat *RCTTWVideoModuleCameraSourceSelectVideoFormatBySize(AVCaptureDevice *device, CMVideoDimensions targetSize) {
     TVIVideoFormat *selectedFormat = nil;
+
+    BOOL passedParamsAreGood = kRCTTWVideoAppCameraSourceDimensions.width >= targetSize.width && kRCTTWVideoAppCameraSourceDimensions.height >= targetSize.height;
     // Ordered from smallest to largest.
     NSOrderedSet<TVIVideoFormat *> *formats = [TVICameraSource supportedFormatsForDevice:device];
 
@@ -49,7 +51,15 @@ TVIVideoFormat *RCTTWVideoModuleCameraSourceSelectVideoFormatBySize(AVCaptureDev
         if (format.pixelFormat != TVIPixelFormatYUV420BiPlanarFullRange) {
             continue;
         }
+
         selectedFormat = format;
+
+        if (passedParamsAreGood) {
+            selectedFormat.frameRate = kRCTTWVideoCameraSourceFrameRate;
+            selectedFormat.dimensions = kRCTTWVideoAppCameraSourceDimensions;
+            break;
+        }
+
         // ^ Select whatever is available until we find one we like and short-circuit
         CMVideoDimensions dimensions = format.dimensions;
 
@@ -421,7 +431,7 @@ RCT_EXPORT_METHOD(getStats) {
   }
 }
 
-RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType) {
+RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName enableAudio:(BOOL *)enableAudio enableVideo:(BOOL *)enableVideo encodingParameters:(NSDictionary *)encodingParameters enableNetworkQualityReporting:(BOOL *)enableNetworkQualityReporting dominantSpeakerEnabled:(BOOL *)dominantSpeakerEnabled cameraType:(NSString *)cameraType videoParams:(NSDictionary *)videoParams frameRate:(NSInteger *)frameRate) {
   [self _setLocalVideoEnabled:enableVideo cameraType:cameraType];
   if (self.localAudioTrack) {
     [self.localAudioTrack setEnabled:enableAudio];
@@ -445,6 +455,17 @@ RCT_EXPORT_METHOD(connect:(NSString *)accessToken roomName:(NSString *)roomName 
     builder.dominantSpeakerEnabled = dominantSpeakerEnabled ? YES : NO;
 
     builder.roomName = roomName;
+
+    if (frameRate) {
+        kRCTTWVideoCameraSourceFrameRate = frameRate;
+    }
+
+    if(videoParams[@"width"] && videoParams[@"height"]){
+      NSInteger width = [videoParams[@"width"] integerValue];
+      NSInteger height = [videoParams[@"height"] integerValue];
+      kRCTTWVideoAppCameraSourceDimensions.width = width;
+      kRCTTWVideoAppCameraSourceDimensions.height = height;
+    }
 
     if(encodingParameters[@"enableH264Codec"]){
       builder.preferredVideoCodecs = @[ [TVIH264Codec new] ];
