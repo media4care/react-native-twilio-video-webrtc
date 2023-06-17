@@ -437,6 +437,7 @@ public class CustomTwilioVideoView extends View implements LifecycleEventListene
 
     public void releaseResource() {
         themedReactContext.removeLifecycleEventListener(this);
+        disconnect(); 
         room = null;
         localVideoTrack = null;
         thumbnailVideoView = null;
